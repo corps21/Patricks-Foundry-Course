@@ -77,121 +77,121 @@ contract LotteryTest is Test {
         lottery.enterLottery{value: LOTTERY_FEE}();
     }
 
-    // function testCheckUpKeepReturnsFalseForZeroBalance() external {
-    //      vm.prank(player);
-    //     lottery.enterLottery{value:LOTTERY_FEE}();
-    //     vm.warp(block.timestamp + interval + 1);
-    //     vm.roll(block.number + 1);
+    function testCheckUpKeepReturnsFalseForZeroBalance() external {
+         vm.prank(player);
+        lottery.enterLottery{value:LOTTERY_FEE}();
+        vm.warp(block.timestamp + interval + 1);
+        vm.roll(block.number + 1);
 
-    //     (bool UpKeepNeeded, )  = lottery.checkUpkeep("");
+        (bool UpKeepNeeded, )  = lottery.checkUpkeep("");
 
-    //     assert(!UpKeepNeeded);
-    // }
+        assert(!UpKeepNeeded);
+    }
 
-    // function testCheckUpKeepReturnsFalseIfLotteryNotOpen() external {
-    //     vm.prank(player);
-    //     lottery.enterLottery{value:LOTTERY_FEE}();
-    //     vm.warp(block.timestamp + interval + 1);
-    //     vm.roll(block.number + 1);
-    //     lottery.performUpkeep("");
+    function testCheckUpKeepReturnsFalseIfLotteryNotOpen() external {
+        vm.prank(player);
+        lottery.enterLottery{value:LOTTERY_FEE}();
+        vm.warp(block.timestamp + interval + 1);
+        vm.roll(block.number + 1);
+        lottery.performUpkeep("");
 
-    //     (bool UpKeepNeeded, )  = lottery.checkUpkeep("");
+        (bool UpKeepNeeded, )  = lottery.checkUpkeep("");
 
-    //     assert(!UpKeepNeeded);
-    // }
+        assert(!UpKeepNeeded);
+    }
 
-    // function testCheckUpKeepReturnsFalseIfEnoughTimeHasntPassed() external {
-    //     vm.prank(player);
-    //     lottery.enterLottery{value:LOTTERY_FEE}(); //s_player.length > 0
-    //     // address(lottery).balance > 0
+    function testCheckUpKeepReturnsFalseIfEnoughTimeHasntPassed() external {
+        vm.prank(player);
+        lottery.enterLottery{value:LOTTERY_FEE}(); //s_player.length > 0
+        // address(lottery).balance > 0
 
-    //     //lottery state is OPEN by default
-
-
-    //     (bool UpKeepNeeded, )  = lottery.checkUpkeep("");
-
-    //     assert(!UpKeepNeeded);
-    // }
-
-    // function testCheckUpKeepReturnsTrueWhenParametersAreGood() external {
-    //     vm.prank(player);
-    //     lottery.enterLottery{value:LOTTERY_FEE}();
-    //     vm.warp(block.timestamp + interval + 1);
-    //     vm.roll(block.number + 1);
-    //     lottery.performUpkeep("");
-
-    //     (bool UpKeepNeeded, )  = lottery.checkUpkeep("");
-
-    //     assert(UpKeepNeeded);
-    // }
-
-    // function testPerformUpKeepCanOnlyRunIfCheckUpKeepIsTrue() external {
-    //     vm.prank(player);
-    //     lottery.enterLottery{value:LOTTERY_FEE}();
-    //     vm.warp(block.timestamp + interval + 1);
-    //     vm.roll(block.number + 1);
+        //lottery state is OPEN by default
 
 
-    //     lottery.performUpkeep("");
-    // }
+        (bool UpKeepNeeded, )  = lottery.checkUpkeep("");
 
-    // function testPerformUpKeepRevertsIfCheckUpKeepIsFalse() external {
-    //     vm.expectRevert(Lottery.Lottery__UpkeepNotNeeded.selector);
-    //     lottery.performUpkeep("");
-    // }
+        assert(!UpKeepNeeded);
+    }
 
-    // modifier LotteryEnteredAndTimePassed() {
-    //     vm.prank(player);
-    //     lottery.enterLottery{value:LOTTERY_FEE}();
-    //     vm.warp(block.timestamp + interval + 1);
-    //     vm.roll(block.number + 1);
-    //     _;
-    // }
+    function testCheckUpKeepReturnsTrueWhenParametersAreGood() external {
+        vm.prank(player);
+        lottery.enterLottery{value:LOTTERY_FEE}();
+        vm.warp(block.timestamp + interval + 1);
+        vm.roll(block.number + 1);
+        lottery.performUpkeep("");
 
-    // function testPerformUpKeepUpdatesLotteryStateAndEmitRequestId() external LotteryEnteredAndTimePassed {
-    //     vm.recordLogs();
-    //     lottery.performUpkeep("");
-    //     Vm.Log[] memory entries = vm.getRecordedLogs();
-    //     bytes32 requestId = entries[1].topics[1];
+        (bool UpKeepNeeded, )  = lottery.checkUpkeep("");
 
-    //     Lottery.LotteryState rState = lottery.getLotteryState();
-    //     assert(uint256(requestId) > 0);
+        assert(UpKeepNeeded);
+    }
 
-    //     assert(rState == Lottery.LotteryState.CALCULATING);
-    // }
+    function testPerformUpKeepCanOnlyRunIfCheckUpKeepIsTrue() external {
+        vm.prank(player);
+        lottery.enterLottery{value:LOTTERY_FEE}();
+        vm.warp(block.timestamp + interval + 1);
+        vm.roll(block.number + 1);
 
-    // function testFulfillRandomWordsCanOnlyBePerformedAfterPerformUpKeep(uint256 randomRequestId) external LotteryEnteredAndTimePassed {
-    //     vm.expectRevert("nonexistent request");
+
+        lottery.performUpkeep("");
+    }
+
+    function testPerformUpKeepRevertsIfCheckUpKeepIsFalse() external {
+        vm.expectRevert(Lottery.Lottery__UpkeepNotNeeded.selector);
+        lottery.performUpkeep("");
+    }
+
+    modifier LotteryEnteredAndTimePassed() {
+        vm.prank(player);
+        lottery.enterLottery{value:LOTTERY_FEE}();
+        vm.warp(block.timestamp + interval + 1);
+        vm.roll(block.number + 1);
+        _;
+    }
+
+    function testPerformUpKeepUpdatesLotteryStateAndEmitRequestId() external LotteryEnteredAndTimePassed {
+        vm.recordLogs();
+        lottery.performUpkeep("");
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        bytes32 requestId = entries[1].topics[1];
+
+        Lottery.LotteryState rState = lottery.getLotteryState();
+        assert(uint256(requestId) > 0);
+
+        assert(rState == Lottery.LotteryState.CALCULATING);
+    }
+
+    function testFulfillRandomWordsCanOnlyBePerformedAfterPerformUpKeep(uint256 randomRequestId) external LotteryEnteredAndTimePassed {
+        vm.expectRevert("nonexistent request");
         
-    //     VRFCoordinatorV2Mock(vrfcoordinator).fulfillRandomWords(randomRequestId, address(lottery));
+        VRFCoordinatorV2Mock(vrfcoordinator).fulfillRandomWords(randomRequestId, address(lottery));
 
-    // }
+    }
 
-    // function testFulfillRandomWordsPicksAWinnerAndResetsAndSendMoney() external LotteryEnteredAndTimePassed {
-    //     uint256 additionalEntrants = 5;
-    //     uint256 startingIndex = 1;
-    //     for(uint256 i = startingIndex; i<startingIndex + additionalEntrants; i++) {
-    //         address Player = address(uint160(i));
-    //         hoax(Player, 1 ether);
-    //         lottery.enterLottery{value: LOTTERY_FEE}("");
-    //     }
+    function testFulfillRandomWordsPicksAWinnerAndResetsAndSendMoney() external LotteryEnteredAndTimePassed {
+        uint256 additionalEntrants = 5;
+        uint256 startingIndex = 1;
+        for(uint256 i = startingIndex; i<startingIndex + additionalEntrants; i++) {
+            address Player = address(uint160(i));
+            hoax(Player, 1 ether);
+            lottery.enterLottery{value: LOTTERY_FEE}();
+        }
 
-    //     uint256 price = LOTTERY_FEE * (additionalEntrants + 1);
+        uint256 price = LOTTERY_FEE * (additionalEntrants + 1);
 
-    //     vm.recordLogs();
-    //     lottery.performUpkeep("");
-    //     Vm.Log[] memory entries = vm.getRecordedLogs();
-    //     bytes32 requestId = entries[1].topic[0];
-    //     uint256 previousTimeStamp = lottery.getLastTimeStamp();
+        vm.recordLogs();
+        lottery.performUpkeep("");
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        bytes32 requestId = entries[1].topics[1];
+        uint256 previousTimeStamp = lottery.getLastTimeStamp();
 
         
-    //     VRFCoordinatorV2Mock(vrfcoordinator).fulfillRandomWords(uint256(requestId), address(lottery));
+        VRFCoordinatorV2Mock(vrfcoordinator).fulfillRandomWords(uint256(requestId), address(lottery));
 
 
-    //     assert(uint256(lottery.getLotteryState()) == 0);
-    //     assert(lottery.getRecentWinner() != address(0));
-    //     assert(lottery.getLengthOfPlayers() == 0);
-    //     assert(lottery.getLastTimeStamp() > previousTimeStamp);
-    //     assert(lottery.getRecentWinner().balance == STARTING_USER_BALANCE + price - LOTTERY_FEE);
-    // }
+        assert(uint256(lottery.getLotteryState()) == 0);
+        assert(lottery.getRecentWinner() != address(0));
+        assert(lottery.getLengthOfPlayers() == 0);
+        assert(lottery.getLastTimeStamp() > previousTimeStamp);
+        assert(lottery.getRecentWinner().balance == STARTING_USER_BALANCE + price - LOTTERY_FEE);
+    }
 }
