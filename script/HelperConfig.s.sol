@@ -5,6 +5,7 @@ import {Script} from "../lib/forge-std/src/Script.sol";
 import {VRFCoordinatorV2Mock} from
     "../lib/chainlink-brownie-contracts/contracts/src/v0.8/mocks/VRFCoordinatorV2Mock.sol";
 import {LinkToken} from "../test/Mocks/LinkToken.sol";
+import {console} from "../lib/forge-std/src/console.sol";
 
 contract HelperConfig is Script {
     struct NetworkConfig {
@@ -65,5 +66,9 @@ contract HelperConfig is Script {
                 deployerKey: DEFAULT_ANVIL_KEY
             });
         }
+    }
+
+    function getActiveNetworkConfig() external view returns(NetworkConfig memory) {
+        return activeNetworkConfig;
     }
 }

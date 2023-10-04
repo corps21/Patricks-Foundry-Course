@@ -86,7 +86,6 @@ contract LotteryTest is Test {
         vm.warp(block.timestamp + interval + 1);
         vm.roll(block.number + 1);
         lottery.performUpkeep("");
-        
 
         (bool UpKeepNeeded,) = lottery.checkUpkeep("");
 
@@ -162,16 +161,17 @@ contract LotteryTest is Test {
         assert(rState == Lottery.LotteryState.CALCULATING);
     }
 
-    modifier skipFork {
-        if(block.chainid != 31337) {
+    modifier skipFork() {
+        if (block.chainid != 31337) {
             return;
         }
-            _;
+        _;
     }
 
     function testFulfillRandomWordsCanOnlyBePerformedAfterPerformUpKeep(uint256 randomRequestId)
         external
-        LotteryEnteredAndTimePassed skipFork
+        LotteryEnteredAndTimePassed
+        skipFork
     {
         vm.expectRevert("nonexistent request");
 

@@ -26,10 +26,9 @@ contract DeployLottery is Script {
         if (subscriptionId == 0) {
             CreateSubscription createSubscription = new CreateSubscription();
             subscriptionId = createSubscription.createSubscriptionId(vrfcoordinator, deployerKey);
-
         }
-            FundSubscription fundSubscriptions = new FundSubscription();
-            fundSubscriptions.fundSubscription(vrfcoordinator, subscriptionId, link, deployerKey);
+        FundSubscription fundSubscriptions = new FundSubscription();
+        fundSubscriptions.fundSubscription(vrfcoordinator, subscriptionId, link, deployerKey);
 
         vm.startBroadcast(deployerKey);
         Lottery lottery = new Lottery(
