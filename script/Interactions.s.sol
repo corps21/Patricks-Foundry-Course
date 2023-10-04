@@ -13,19 +13,42 @@ contract CreateSubscription is Script {
     function createSubscriptionUsingConfig() internal returns (uint64) {
         HelperConfig helperConfig = new HelperConfig();
 
-        (,, address vrfcoordinator,,,,) = helperConfig.activeNetworkConfig();
+        (,, address vrfcoordinator,,,,, uint256 deployerKey) = helperConfig.activeNetworkConfig();
 
-        return createSubscriptionId(vrfcoordinator);
+        return createSubscriptionId(vrfcoordinator, deployerKey);
     }
 
-    function createSubscriptionId(address vrfcoordinator) public returns (uint64) {
+    function createSubscriptionId(address vrfcoordinator, uint256 deployerKey) public returns (uint64) {
+        vm.startBroadcast(deployerKey);
         VRFCoordinatorV2Mock vrfCoo = VRFCoordinatorV2Mock(vrfcoordinator);
-        uint64 result = vrfCoo.createSubscription();
-        return result;
+        uint64 SubId = vrfCoo.createSubscription();
+        vm.stopBroadcast();
+        return SubId;
     }
 
     function run() external returns (uint64) {
         return createSubscriptionUsingConfig();
+    }
+}
+
+contract AddConsumer is Script {
+    function addConsumerUsingConfig(address _contractAddress) internal {
+        HelperConfig helperConfig = new HelperConfig();
+        (,, address vrfCoordinatorV2,, uint64 subId,,, uint256 deployerKey) = helperConfig.activeNetworkConfig();
+        addConsumer(_contractAddress, vrfCoordinatorV2, subId, deployerKey);
+    }
+
+    function addConsumer(address _contractAddress, address vrfCoordinatorV2, uint64 subId, uint256 deployerKey)
+        public
+    {
+        vm.startBroadcast(deployerKey);
+        VRFCoordinatorV2Mock(vrfCoordinatorV2).addConsumer(subId, _contractAddress);
+        vm.stopBroadcast();
+    }
+
+    function run() external {
+        address contractAddress = DevOpsTools.get_most_recent_deployment("lottery", block.chainid);
+        addConsumerUsingConfig(contractAddress);
     }
 }
 
@@ -34,20 +57,21 @@ contract FundSubscription is Script {
 
     function fundSubscriptionUsingConfig() public {
         HelperConfig helperConfig = new HelperConfig();
-        (,, address vrfCoordinatorV2,, uint64 subId,, address link) = helperConfig.activeNetworkConfig();
-        fundSubscription(vrfCoordinatorV2, subId, link);
+        (,, address vrfCoordinatorV2,, uint64 subId,, address link, uint256 deployerKey) =
+            helperConfig.activeNetworkConfig();
+        fundSubscription(vrfCoordinatorV2, subId, link, deployerKey);
     }
 
-    function fundSubscription(address vrfCoordinatorV2, uint64 subId, address link) public {
+    function fundSubscription(address vrfCoordinatorV2, uint64 subId, address link, uint256 deployerKey) public {
         console.log("Funding subscription: ", subId);
         console.log("Using vrfCoordinator: ", vrfCoordinatorV2);
         console.log("On ChainID: ", block.chainid);
         if (block.chainid == 31337) {
-            vm.startBroadcast();
+            vm.startBroadcast(deployerKey);
             VRFCoordinatorV2Mock(vrfCoordinatorV2).fundSubscription(subId, FUND_AMOUNT);
             vm.stopBroadcast();
         } else {
-            vm.startBroadcast();
+            vm.startBroadcast(deployerKey);
             LinkToken(link).transferAndCall(vrfCoordinatorV2, FUND_AMOUNT, abi.encode(subId));
             vm.stopBroadcast();
         }
@@ -56,24 +80,4 @@ contract FundSubscription is Script {
     function run() external {
         fundSubscriptionUsingConfig();
     }
-}
-
-contract AddConsumer is Script {
-    function run() external {
-        address contractAddress = DevOpsTools.get_most_recent_deployment("Lottery", block.chainid);
-        addConsumerUsingConfig(contractAddress);
-    }
-
-    function addConsumerUsingConfig(address _contractAddress) internal {
-        HelperConfig helperConfig = new HelperConfig();
-        (,, address vrfCoordinatorV2,, uint64 subId,,) = helperConfig.activeNetworkConfig();
-        addConsumer(_contractAddress, vrfCoordinatorV2, subId);
-    }
-
-    function addConsumer(address _contractAddress, address vrfCoordinatorV2, uint64 subId) public {
-        vm.startBroadcast();
-        VRFCoordinatorV2Mock(vrfCoordinatorV2).addConsumer(subId, _contractAddress);
-        vm.stopBroadcast();
-    }
-
 }

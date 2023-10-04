@@ -83,6 +83,8 @@ contract Lottery is VRFConsumerBaseV2 {
     function enterLottery() external payable {
         if (msg.value != i_lotteryFee) {
             revert Lottery__notEnoughEthSend();
+        } else if (s_lotteryState == LotteryState.CALCULATING) {
+            revert Lottery__notAvailableYet();
         }
         s_players.push(payable(msg.sender));
         emit EnteredLottery(msg.sender);
@@ -139,8 +141,10 @@ contract Lottery is VRFConsumerBaseV2 {
         address winner = s_players[_randomWords[0] % lengthOfList];
         emit WinnerPicked(winner);
 
+        s_recentWinner = winner;
         s_lotteryState = LotteryState.OPEN;
         s_players = new address payable[] (0);
+        s_lastTimeStamp = block.timestamp;
 
         (bool success,) = winner.call{value: address(this).balance}("");
         if (!success) {
@@ -168,11 +172,11 @@ contract Lottery is VRFConsumerBaseV2 {
         return s_recentWinner;
     }
 
-    function getLengthOfPlayers() external view returns(uint256) {
+    function getLengthOfPlayers() external view returns (uint256) {
         return s_players.length;
     }
 
-    function getLastTimeStamp() external view returns(uint256) {
+    function getLastTimeStamp() external view returns (uint256) {
         return s_lastTimeStamp;
     }
 }

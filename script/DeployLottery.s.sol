@@ -19,19 +19,19 @@ contract DeployLottery is Script {
             bytes32 keyHash,
             uint64 subscriptionId,
             uint32 callbackGasLimit,
-            address link
+            address link,
+            uint256 deployerKey
         ) = helperConfig.activeNetworkConfig();
 
         if (subscriptionId == 0) {
             CreateSubscription createSubscription = new CreateSubscription();
-            subscriptionId = createSubscription.createSubscriptionId(vrfcoordinator);
-            
-            FundSubscription fundSubscriptions = new FundSubscription();
-            fundSubscriptions.fundSubscription(vrfcoordinator, subscriptionId, link);
+            subscriptionId = createSubscription.createSubscriptionId(vrfcoordinator, deployerKey);
+
         }
+            FundSubscription fundSubscriptions = new FundSubscription();
+            fundSubscriptions.fundSubscription(vrfcoordinator, subscriptionId, link, deployerKey);
 
-
-        vm.startBroadcast();
+        vm.startBroadcast(deployerKey);
         Lottery lottery = new Lottery(
                 lotteryFee,
                 interval,
@@ -43,7 +43,7 @@ contract DeployLottery is Script {
         vm.stopBroadcast();
 
         AddConsumer addConsumers = new AddConsumer();
-        addConsumers.addConsumer(address(lottery), vrfcoordinator, subscriptionId);
+        addConsumers.addConsumer(address(lottery), vrfcoordinator, subscriptionId, deployerKey);
 
         return (lottery, helperConfig);
     }
