@@ -5,7 +5,6 @@ import {Script} from "../lib/forge-std/src/Script.sol";
 import {VRFCoordinatorV2Mock} from
     "../lib/chainlink-brownie-contracts/contracts/src/v0.8/mocks/VRFCoordinatorV2Mock.sol";
 import {LinkToken} from "../test/Mocks/LinkToken.sol";
-import {console} from "../lib/forge-std/src/console.sol";
 
 contract HelperConfig is Script {
     struct NetworkConfig {
@@ -21,7 +20,7 @@ contract HelperConfig is Script {
 
     uint256 constant DEFAULT_ANVIL_KEY = 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80;
 
-    NetworkConfig public activeNetworkConfig;
+    NetworkConfig private activeNetworkConfig;
 
     constructor() {
         if (block.chainid == 11155111) {
@@ -68,7 +67,22 @@ contract HelperConfig is Script {
         }
     }
 
-    function getActiveNetworkConfig() external view returns(NetworkConfig memory) {
-        return activeNetworkConfig;
+    function getActiveNetworkConfig()
+        external
+        view
+        returns (uint256, uint256, address, bytes32, uint64, uint32, address, uint256)
+    {
+        NetworkConfig memory result = activeNetworkConfig;
+
+        return (
+            result.lotteryFee,
+            result.interval,
+            result.vrfcoordinator,
+            result.keyHash,
+            result.subscriptionId,
+            result.callbackGasLimit,
+            result.link,
+            result.deployerKey
+        );
     }
 }

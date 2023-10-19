@@ -37,7 +37,7 @@ contract LotteryTest is Test {
         vm.deal(player, STARTING_USER_BALANCE);
 
         (lotteryFee, interval, vrfcoordinator, keyHash,, callbackGasLimit, link, deployerKey) =
-            helperConfig.activeNetworkConfig();
+            helperConfig.getActiveNetworkConfig();
     }
 
     function testLotteryStateIsOpen() external view {

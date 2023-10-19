@@ -21,7 +21,7 @@ contract DeployLottery is Script {
             uint32 callbackGasLimit,
             address link,
             uint256 deployerKey
-        ) = helperConfig.activeNetworkConfig();
+        ) = helperConfig.getActiveNetworkConfig();
 
         if (subscriptionId == 0) {
             CreateSubscription createSubscription = new CreateSubscription();
